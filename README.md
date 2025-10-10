@@ -11,8 +11,8 @@ The main branch template is just the base version I use when building any defaul
 2. Open the preferred branch and copy the template.rb code. Create a template.rb file in the folder you are going to create the new app and pass it in the command.
 
 ## Command for existing rails app
-```bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/main/template.rb``
+```bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/main/template.rb```
 
 ## Command for new rails app
-```rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/main/template.rb``
+```rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/main/template.rb```
 

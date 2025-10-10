@@ -1,0 +1,24 @@
+current directory: /home/masonroberts/dev/develop/rails8/rails-templates/vendor/bundle/ruby/3.3.0/gems/date-3.4.1/ext/date
+/home/masonroberts/.rbenv/versions/3.3.7/bin/ruby extconf.rb
+checking for rb_category_warn()... yes
+checking for timezone in time.h with  -Werror... yes
+checking for altzone in time.h with  -Werror... no
+creating Makefile
+
+current directory: /home/masonroberts/dev/develop/rails8/rails-templates/vendor/bundle/ruby/3.3.0/gems/date-3.4.1/ext/date
+make DESTDIR\= sitearchdir\=./.gem.20251009-2300332-wpd7e6 sitelibdir\=./.gem.20251009-2300332-wpd7e6 clean
+
+current directory: /home/masonroberts/dev/develop/rails8/rails-templates/vendor/bundle/ruby/3.3.0/gems/date-3.4.1/ext/date
+make DESTDIR\= sitearchdir\=./.gem.20251009-2300332-wpd7e6 sitelibdir\=./.gem.20251009-2300332-wpd7e6
+compiling date_core.c
+compiling date_parse.c
+compiling date_strftime.c
+compiling date_strptime.c
+linking shared-object date_core.so
+
+current directory: /home/masonroberts/dev/develop/rails8/rails-templates/vendor/bundle/ruby/3.3.0/gems/date-3.4.1/ext/date
+make DESTDIR\= sitearchdir\=./.gem.20251009-2300332-wpd7e6 sitelibdir\=./.gem.20251009-2300332-wpd7e6 install
+/usr/bin/install -c -m 0755 date_core.so ./.gem.20251009-2300332-wpd7e6
+
+current directory: /home/masonroberts/dev/develop/rails8/rails-templates/vendor/bundle/ruby/3.3.0/gems/date-3.4.1/ext/date
+make DESTDIR\= sitearchdir\=./.gem.20251009-2300332-wpd7e6 sitelibdir\=./.gem.20251009-2300332-wpd7e6 clean

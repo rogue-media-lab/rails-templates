@@ -1,0 +1,19 @@
+current directory: /home/masonroberts/dev/develop/rails8/rails-templates/vendor/bundle/ruby/3.3.0/gems/debug-1.11.0/ext/debug
+/home/masonroberts/.rbenv/versions/3.3.7/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /home/masonroberts/dev/develop/rails8/rails-templates/vendor/bundle/ruby/3.3.0/gems/debug-1.11.0/ext/debug
+make DESTDIR\= sitearchdir\=./.gem.20251009-2300332-hk70da sitelibdir\=./.gem.20251009-2300332-hk70da clean
+
+current directory: /home/masonroberts/dev/develop/rails8/rails-templates/vendor/bundle/ruby/3.3.0/gems/debug-1.11.0/ext/debug
+make DESTDIR\= sitearchdir\=./.gem.20251009-2300332-hk70da sitelibdir\=./.gem.20251009-2300332-hk70da
+compiling debug.c
+compiling iseq_collector.c
+linking shared-object debug/debug.so
+
+current directory: /home/masonroberts/dev/develop/rails8/rails-templates/vendor/bundle/ruby/3.3.0/gems/debug-1.11.0/ext/debug
+make DESTDIR\= sitearchdir\=./.gem.20251009-2300332-hk70da sitelibdir\=./.gem.20251009-2300332-hk70da install
+/usr/bin/install -c -m 0755 debug.so ./.gem.20251009-2300332-hk70da/debug
+
+current directory: /home/masonroberts/dev/develop/rails8/rails-templates/vendor/bundle/ruby/3.3.0/gems/debug-1.11.0/ext/debug
+make DESTDIR\= sitearchdir\=./.gem.20251009-2300332-hk70da sitelibdir\=./.gem.20251009-2300332-hk70da clean

@@ -1,156 +1,109 @@
-require 'fileutils'
+# 1. Define CSS Content
+tailwind_css_content = <<-CSS
+@import "tailwindcss";
 
-# Modify gitignore and workflow for rails and node for basic setup.
-# The added weight of the gem files should not be pushed up to github.
+@theme {
+  --color-ivory-50: #fefdfb;
+  --color-ivory-100: #fdf9f3;
+  --color-ivory-200: #faf2e7;
+  --color-ivory-300: #f6e8d7;
+  --color-ivory-400: #f0d9c3;
+  --color-ivory-500: #e8c7a6;
+  --color-ivory-600: #d4a574;
+  --color-ivory-700: #b8834a;
+  --color-ivory-800: #8f6238;
+  --color-ivory-900: #6b4a2a;
 
-# On setting up testing, When cloning the repo, run bundle or bundle install and Rails will review 
-# the gem / gem-lock file and install the missing gems. Pushing that weight is not needed.
+  --color-pastel-pink: #f8d7da;
+  --color-pastel-lavender: #e2d5f1;
+  --color-pastel-mint: #d1f2eb;
+  --color-pastel-peach: #fdebd0;
+  --color-pastel-sky: #cce7ff;
+  --color-pastel-sage: #e8f5e8;
 
-# This templates will add the lines to the gitignore, cutting the weight of the tracked 
-# files, and modify the workflow job - test to ensure the container is set up properly
-# and working. Uses PostgreSQL in workflow. 
+  --font-family-sans: 'Inter var', ui-sans-serif, system-ui, sans-serif;
+}
 
-# NOTE - This will append to .gitignore and overwrite ci.yml if it exists.
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
 
-# Method to write a file, overwriting existing content
-def write_file(file_path, content)
-  if File.exist?(file_path)
-    puts "Warning: #{file_path} already exists. Overwriting it."
-  end
-  File.open(file_path, 'w') do |file|
-    file.write(content)
-  end
-  puts "Created/updated file: #{file_path}"
-rescue => e
-  puts "Error writing to #{file_path}: #{e.message}"
-end
+@keyframes slideUp {
+  0% { transform: translateY(10px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
 
-# Method to append content to a file if it doesn't already exist
-def append_to_file(file_path, content)
-  existing_content = File.read(file_path) if File.exist?(file_path)
-  unless existing_content&.include?(content)
-    File.open(file_path, 'a') do |file|
-      file.puts(content)
-    end
-    puts "Appended to #{file_path}."
-  else
-    puts "Content already exists in #{file_path}. Skipping."
-  end
-rescue => e
-  puts "Error updating #{file_path}: #{e.message}"
-end
+@theme {
+  --animate-fade-in: fadeIn 0.5s ease-in-out;
+  --animate-slide-up: slideUp 0.3s ease-out;
+}
+CSS
 
-# Add lines to .gitignore
-append_to_file('.gitignore', <<-CODE
-# ignore the gems of bundle
-/vendor/bundle
-CODE
-)
+say "🚀 Setting up custom Tailwind CSS theme and documentation...", :cyan
 
-# Ensure the workflows directory exists
-workflow_dir = '.github/workflows'
-FileUtils.mkdir_p(workflow_dir) unless Dir.exist?(workflow_dir)
-puts "Created directory: #{workflow_dir}"
+# 2. Handle the CSS File
+# Note: The path 'app/assets/tailwind/application.css' is used for consistency
+# as it's referenced in the documentation content below.
+create_file 'app/assets/tailwind/application.css', tailwind_css_content, force: true
+say "✅ The Tailwind theme has been applied.", :green
 
-# Modify the ci.yml file
-inside(workflow_dir) do
-  write_file('ci.yml', <<-YAML
-name: CI
+# 3. Define MARKDOWN Content
+tailwind_doc_content = <<-MARKDOWN
+# Tailwind CSS Theme Configuration
 
-on:
-  pull_request:
-  push:
-    branches: [ main ]
+This file outlines the custom theme properties added to your Tailwind CSS setup via the `tailwind-rails` gem.
 
-jobs:
-  scan_ruby:
-    runs-on: ubuntu-latest
+## Location
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+The theme configuration is located in: `app/assets/tailwind/application.css`
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: .ruby-version
-          bundler-cache: true
+## Modifying the Theme
 
-      - name: Scan for common Rails security vulnerabilities using static analysis
-        run: bin/brakeman --no-pager
+You can modify the theme directly within the `@theme` block in the `application.css` file.
 
-  scan_js:
-    runs-on: ubuntu-latest
+### Colors
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+Custom colors are defined using CSS variables. You can add new variables or change existing ones.
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: .ruby-version
-          bundler-cache: true
+**Example:**
+@theme {
+  --color-ivory-50: #fefdfb;
+  /* ... other colors */
+  --color-new-brand-blue: #0055a4;
+}
 
-      - name: Scan for security vulnerabilities in JavaScript dependencies
-        run: bin/importmap audit
+To use these colors in your HTML, apply them using Tailwind's arbitrary value syntax:
 
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+<div class="bg-[--color-ivory-50] text-[--color-new-brand-blue]">...</div>
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: .ruby-version
-          bundler-cache: true
+### Fonts
 
-      - name: Lint code for consistent style
-        run: bin/rubocop -f github
+The default sans-serif font family is set. You can change it by modifying the `--font-family-sans` variable.
 
-  test:
-    runs-on: ubuntu-latest
+@theme {
+    --font-family-sans: 'Your-New-Font', ui-sans-serif, system-ui, sans-serif;
+}
 
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_USER: postgres # Default for postgres. Container will be destroyed after run.
-          POSTGRES_PASSWORD: postgres # Default for postgres.
-        ports:
-          - 5432:5432
-        options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
+### Animations
 
-    steps:
-      - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y google-chrome-stable curl libjemalloc2 libvips postgresql-client
+Custom keyframes (`fadeIn`, `slideUp`) and animation utilities are defined. You can add more following the same pattern.
 
-      - name: Checkout code # Grab the code for the package json
-        uses: actions/checkout@v4
+@keyframes yourNewAnimation {
+  /* ... */
+}
 
-      - name: Set up Ruby # Will run bundle auto on setup I assume because bundler-cache true.
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: .ruby-version
-          bundler-cache: true
+@theme {
+  --animate-your-new-animation: yourNewAnimation 1s ease;
+}
 
-      - name: Run tests # Run Rails app tests
-        env:
-          RAILS_ENV: test
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432
-        run: 
-          bin/rails db:migrate db:test:prepare test test:system
+Use it in your HTML like this:
 
-      - name: Keep screenshots from failed system tests
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: screenshots
-          path: ${{ github.workspace }}/tmp/screenshots
-          if-no-files-found: ignore
+<div class="animate-[--animate-your-new-animation]">...</div>
 
-YAML
-  )
-end
+For more information on theming with `tailwind-rails`, refer to the official documentation.
+MARKDOWN
+
+# 4. Create the Markdown Documentation File
+create_file 'tailwind-config.md', tailwind_doc_content
+say "📄 The Tailwind documentation has been created.", :green

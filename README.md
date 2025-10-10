@@ -7,7 +7,7 @@ This template will modify the git environment and git workflow. Specifically it 
 The main branch template is just the base version I use when building any default app I want to play, learn, or explore with. This template will rewrite two default files. The gitignore file to add the line to ignore the bundle folder inside the vendor folder. It will also add some configuration to the ci.yml file for the github workflow to set up pg and run bundle when setting up ruby by grabbing the code before the ruby setup and setting the cache to true.
 
 ## Two ways to use
-1. Open the preferred branch and click on the template.rb file. Click on the "*raw*" button and use that url in the command.
+1. Open the preferred branch and click on the template.rb file. Click on the "*raw*" button and use that url in the command, passing the -m flag.
 2. Open the preferred branch and copy the template.rb code. Create a template.rb file in the folder you are going to create the new app and pass it in the command.
 
 ## Command for existing rails app

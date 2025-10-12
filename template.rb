@@ -1,156 +1,139 @@
-require 'fileutils'
+# flash_template.rb
 
-# Modify gitignore and workflow for rails and node for basic setup.
-# The added weight of the gem files should not be pushed up to github.
+# This template will:
+# 1. Create a Stimulus controller for dismissing flash messages.
+# 2. Create a shared partial for rendering flash message content.
+# 3. Add the necessary CSS keyframes and animation classes.
+#    - It will check for a Tailwind CSS setup in `app/assets/stylesheets/tailwind`.
+#    - If found, it appends `@theme` compatible CSS.
+#    - If not, it falls back to standard CSS in `app/assets/stylesheets/application.css`.
+# 4. Inject the partial into the main application layout file.
 
-# On setting up testing, When cloning the repo, run bundle or bundle install and Rails will review 
-# the gem / gem-lock file and install the missing gems. Pushing that weight is not needed.
+say "Setting up modern flash message component...", :cyan
 
-# This templates will add the lines to the gitignore, cutting the weight of the tracked 
-# files, and modify the workflow job - test to ensure the container is set up properly
-# and working. Uses PostgreSQL in workflow. 
+# --- Create Stimulus Controller ---
+create_file "app/javascript/controllers/flash_messages_controller.js", <<~JS
+import { Controller } from "@hotwired/stimulus"
 
-# NOTE - This will append to .gitignore and overwrite ci.yml if it exists.
+export default class extends Controller {
+  static targets = ["message"]
 
-# Method to write a file, overwriting existing content
-def write_file(file_path, content)
-  if File.exist?(file_path)
-    puts "Warning: #{file_path} already exists. Overwriting it."
-  end
-  File.open(file_path, 'w') do |file|
-    file.write(content)
-  end
-  puts "Created/updated file: #{file_path}"
-rescue => e
-  puts "Error writing to #{file_path}: #{e.message}"
+  connect() {
+    // Auto-dismiss flash messages after 5 seconds
+    this.messageTargets.forEach(message => {
+      setTimeout(() => {
+        this.dismissMessage(message)
+      }, 5000)
+    })
+  }
+
+  dismiss(event) {
+    const message = event.currentTarget.closest('[data-flash-messages-target="message"]')
+    this.dismissMessage(message)
+  }
+
+  dismissMessage(message) {
+    message.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out'
+    message.style.opacity = '0'
+    message.style.transform = 'translateX(100%)'
+
+    setTimeout(() => {
+      message.remove()
+    }, 300)
+  }
+}
+JS
+say "✅ Created Stimulus controller: app/javascript/controllers/flash_messages_controller.js", :green
+
+# --- Create ERB Partial ---
+create_file "app/views/shared/_flash_messages.html.erb", <<~ERB
+<%# This partial renders the individual flash message cards %>
+<% if notice %>
+  <div class="bg-pastel-mint border border-green-200 text-green-800 px-4 py-3 rounded-md shadow-lg max-w-sm animate-slide-up"
+       data-flash-messages-target="message"
+       data-action="click->flash-messages#dismiss">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center">
+        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+        </svg>
+        <span class="text-sm font-medium"><%= notice %></span>
+      </div>
+      <button class="ml-2 text-green-600 hover:text-green-800">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+<% end %>
+
+<% if alert %>
+  <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-md shadow-lg max-w-sm animate-slide-up"
+       data-flash-messages-target="message"
+       data-action="click->flash-messages#dismiss">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center">
+        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+        </svg>
+        <span class="text-sm font-medium"><%= alert %></span>
+      </div>
+      <button class="ml-2 text-red-600 hover:text-red-800">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+<% end %>
+ERB
+say "✅ Created flash partial: app/views/shared/_flash_messages.html.erb", :green
+
+# --- Add CSS for Animations ---
+tailwind_css_path = "app/assets/stylesheets/tailwind/application.css"
+
+if File.exist?(tailwind_css_path)
+  say "Tailwind CSS detected. Appending @theme animation.", :blue
+  append_to_file tailwind_css_path, <<~CSS
+
+    @keyframes slideUp {
+      0% { transform: translateY(10px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
+    @theme {
+      --animate-slide-up: slideUp 0.3s ease-out;
+    }
+  CSS
+else
+  say "Standard CSS setup detected. Appending fallback animation class.", :blue
+  append_to_file "app/assets/stylesheets/application.css", <<~CSS
+
+    /* Keyframe for flash message animation */
+    @keyframes slideUp {
+      0% { transform: translateY(10px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Animation class for flash messages */
+    .animate-slide-up {
+      animation: slideUp 0.3s ease-out;
+    }
+  CSS
+  say "⚠️  Warning: A fallback CSS class was added. Your `animate-slide-up` class may not be processed by Tailwind.", :yellow
 end
 
-# Method to append content to a file if it doesn't already exist
-def append_to_file(file_path, content)
-  existing_content = File.read(file_path) if File.exist?(file_path)
-  unless existing_content&.include?(content)
-    File.open(file_path, 'a') do |file|
-      file.puts(content)
-    end
-    puts "Appended to #{file_path}."
-  else
-    puts "Content already exists in #{file_path}. Skipping."
-  end
-rescue => e
-  puts "Error updating #{file_path}: #{e.message}"
-end
+# --- Inject into Layout ---
+layout_snippet = <<~ERB
 
-# Add lines to .gitignore
-append_to_file('.gitignore', <<-CODE
-# ignore the gems of bundle
-/vendor/bundle
-CODE
-)
+    <div class="fixed top-20 right-4 z-50 space-y-2" data-controller="flash-messages">
+      <%= render "shared/flash_messages" %>
+    </div>
+ERB
 
-# Ensure the workflows directory exists
-workflow_dir = '.github/workflows'
-FileUtils.mkdir_p(workflow_dir) unless Dir.exist?(workflow_dir)
-puts "Created directory: #{workflow_dir}"
+insert_into_file 'app/views/layouts/application.html.erb', layout_snippet, after: "<body>"
 
-# Modify the ci.yml file
-inside(workflow_dir) do
-  write_file('ci.yml', <<-YAML
-name: CI
+say "✅ Injected flash messages into layout: app/views/layouts/application.html.erb", :green
 
-on:
-  pull_request:
-  push:
-    branches: [ main ]
-
-jobs:
-  scan_ruby:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: .ruby-version
-          bundler-cache: true
-
-      - name: Scan for common Rails security vulnerabilities using static analysis
-        run: bin/brakeman --no-pager
-
-  scan_js:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: .ruby-version
-          bundler-cache: true
-
-      - name: Scan for security vulnerabilities in JavaScript dependencies
-        run: bin/importmap audit
-
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: .ruby-version
-          bundler-cache: true
-
-      - name: Lint code for consistent style
-        run: bin/rubocop -f github
-
-  test:
-    runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_USER: postgres # Default for postgres. Container will be destroyed after run.
-          POSTGRES_PASSWORD: postgres # Default for postgres.
-        ports:
-          - 5432:5432
-        options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
-
-    steps:
-      - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y google-chrome-stable curl libjemalloc2 libvips postgresql-client
-
-      - name: Checkout code # Grab the code for the package json
-        uses: actions/checkout@v4
-
-      - name: Set up Ruby # Will run bundle auto on setup I assume because bundler-cache true.
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: .ruby-version
-          bundler-cache: true
-
-      - name: Run tests # Run Rails app tests
-        env:
-          RAILS_ENV: test
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432
-        run: 
-          bin/rails db:migrate db:test:prepare test test:system
-
-      - name: Keep screenshots from failed system tests
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: screenshots
-          path: ${{ github.workspace }}/tmp/screenshots
-          if-no-files-found: ignore
-
-YAML
-  )
-end
+say "\nFlash message component created successfully!", :blue

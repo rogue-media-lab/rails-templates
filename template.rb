@@ -1,13 +1,13 @@
-# flash_template.rb
+# flash_template.rb (v2)
 
 # This template will:
 # 1. Create a Stimulus controller for dismissing flash messages.
 # 2. Create a shared partial for rendering flash message content.
 # 3. Add the necessary CSS keyframes and animation classes.
-#    - It will check for a Tailwind CSS setup in `app/assets/stylesheets/tailwind`.
-#    - If found, it appends `@theme` compatible CSS.
+#    - It will check for `tailwind.config.js` to detect a Tailwind CSS setup.
+#    - If found, it appends `@theme` compatible CSS to `app/assets/stylesheets/tailwind/application.css`.
 #    - If not, it falls back to standard CSS in `app/assets/stylesheets/application.css`.
-# 4. Inject the partial into the main application layout file.
+# 4. Inject the partial into the main application layout file with correct indentation.
 
 say "Setting up modern flash message component...", :cyan
 
@@ -91,11 +91,10 @@ ERB
 say "✅ Created flash partial: app/views/shared/_flash_messages.html.erb", :green
 
 # --- Add CSS for Animations ---
-tailwind_css_path = "app/assets/stylesheets/tailwind/application.css"
-
-if File.exist?(tailwind_css_path)
-  say "Tailwind CSS detected. Appending @theme animation.", :blue
-  append_to_file tailwind_css_path, <<~CSS
+# CHANGED: Now checks for tailwind.config.js for more reliable detection.
+if File.exist?("tailwind.config.js")
+  say "tailwind.config.js detected. Appending @theme animation.", :blue
+  css_to_add = <<~CSS
 
     @keyframes slideUp {
       0% { transform: translateY(10px); opacity: 0; }
@@ -106,6 +105,14 @@ if File.exist?(tailwind_css_path)
       --animate-slide-up: slideUp 0.3s ease-out;
     }
   CSS
+
+  # Check if the @theme directive is already present to avoid duplicates.
+  tailwind_css_path = "app/assets/stylesheets/tailwind/application.css"
+  if File.read(tailwind_css_path).include?("@theme")
+    say "⏩ Animation styles already exist in #{tailwind_css_path}. Skipping.", :yellow
+  else
+    append_to_file tailwind_css_path, css_to_add
+  end
 else
   say "Standard CSS setup detected. Appending fallback animation class.", :blue
   append_to_file "app/assets/stylesheets/application.css", <<~CSS
@@ -125,11 +132,12 @@ else
 end
 
 # --- Inject into Layout ---
+# CHANGED: Snippet is now indented by two spaces for proper formatting.
 layout_snippet = <<~ERB
 
-    <div class="fixed top-20 right-4 z-50 space-y-2" data-controller="flash-messages">
-      <%= render "shared/flash_messages" %>
-    </div>
+  <div class="fixed top-20 right-4 z-50 space-y-2" data-controller="flash-messages">
+    <%= render "shared/flash_messages" %>
+  </div>
 ERB
 
 insert_into_file 'app/views/layouts/application.html.erb', layout_snippet, after: "<body>"

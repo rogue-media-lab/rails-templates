@@ -28,7 +28,7 @@ Replaces Minitest with RSpec, FactoryBot, and Faker in a Rails 8 app. Installs a
 ## Dependencies
 
 - Rails 8
-- The [`main` template](../../tree/main) is optional — if the CI workflow exists, the test command is updated automatically
+- The [`base` template](../../tree/base) is optional — if the CI workflow exists, the test command is updated automatically
 
 ## Usage
 

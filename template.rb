@@ -56,7 +56,7 @@ after_bundle do
 
     say "Updated #{ci_path}.", :green
   else
-    say "No CI workflow found — skipping. If you apply the main template later,", :yellow
+    say "No CI workflow found — skipping. If you apply the base template later,", :yellow
     say "update the test run command to: bundle exec rspec", :yellow
   end
 

@@ -1,5 +1,37 @@
-# Configures .gitignore and GitHub Actions CI for a Rails 8 + PostgreSQL app.
+# Configures database.yml, .gitignore, and GitHub Actions CI for a Rails 8 + PostgreSQL app.
+# Uses postgres/postgres credentials by default — update for your environment.
 # Vendor gems are excluded from git — run `bundle install` after cloning.
+
+say "Configuring database.yml...", :cyan
+
+remove_file "config/database.yml"
+create_file "config/database.yml", <<~YAML
+  default: &default
+    adapter: postgresql
+    encoding: unicode
+    host: localhost
+    username: postgres
+    password: postgres
+    pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+  development:
+    <<: *default
+    database: #{app_name}_development
+
+  test:
+    <<: *default
+    database: #{app_name}_test
+
+  production:
+    <<: *default
+    database: #{app_name}_production
+    username: <%= ENV["DATABASE_USERNAME"] %>
+    password: <%= ENV["DATABASE_PASSWORD"] %>
+    host: <%= ENV["DATABASE_HOST"] %>
+YAML
+
+rails_command "db:create"
+say "database.yml configured and databases created.", :green
 
 say "Configuring .gitignore...", :cyan
 

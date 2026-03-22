@@ -4,11 +4,14 @@ Configures `.gitignore` and GitHub Actions CI for a Rails 8 app with PostgreSQL.
 
 ## What It Does
 
-1. Appends `/vendor/bundle` to `.gitignore`
+1. Rewrites `config/database.yml` with `host: localhost`, `username: postgres`, `password: postgres` for development and test environments; production uses `ENV` variables. Runs `db:create`.
+   - Update these credentials if your PostgreSQL setup differs
+
+2. Appends `/vendor/bundle` to `.gitignore`
    - Prevents bundled gems from being committed to version control
    - Reminder to run `bundle install` after cloning
 
-2. Writes `.github/workflows/ci.yml` with a full GitHub Actions pipeline:
+3. Writes `.github/workflows/ci.yml` with a full GitHub Actions pipeline:
    - **scan_ruby** — Brakeman static analysis for Rails security vulnerabilities
    - **scan_js** — importmap audit for JavaScript dependency vulnerabilities
    - **lint** — RuboCop with GitHub annotations format

@@ -11,6 +11,7 @@ A collection of [Rails application templates](https://guides.rubyonrails.org/rai
 | [`navbar`](../../tree/navbar) | Adds a responsive sticky navbar with a Stimulus-powered mobile menu |
 | [`authentication`](../../tree/authentication) | Runs Rails 8 built-in auth generator and styles the views with the ivory theme |
 | [`error-pages`](../../tree/error-pages) | Dynamic 404, 422, and 500 error pages styled with the ivory theme |
+| [`rspec`](../../tree/rspec) | Replaces Minitest with RSpec, FactoryBot, and Faker; updates CI |
 | [`flash-message`](../../tree/flash-message) | Adds a Stimulus-powered flash message component |
 
 ## Recommended Order
@@ -23,7 +24,8 @@ When setting up a new app, apply templates in this order:
 3. navbar         → apply before flash-message for correct z-index stacking
 4. authentication → injects nav links automatically if navbar is present
 5. error-pages    → no dependencies beyond tailwindcss, apply any time
-6. flash-message  → depends on the Tailwind theme and navbar height
+6. rspec          → apply after main so CI is updated automatically
+7. flash-message  → depends on the Tailwind theme and navbar height
 ```
 
 ## Usage
@@ -124,6 +126,24 @@ rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/
 
 ```bash
 bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/error-pages/template.rb
+```
+
+---
+
+## RSpec Template
+
+See the [`rspec` branch](../../tree/rspec) for full details.
+
+### New app
+
+```bash
+rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/rspec/template.rb
+```
+
+### Existing app
+
+```bash
+bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/rspec/template.rb
 ```
 
 ---

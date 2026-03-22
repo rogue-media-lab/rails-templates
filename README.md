@@ -1,153 +1,108 @@
-# Rails 8 Application Templates
+# RSpec Template
 
-A collection of [Rails application templates](https://guides.rubyonrails.org/rails_application_templates.html) for scaffolding and configuring Rails 8 apps. Each branch contains a `template.rb` that can be applied to a new or existing app using the Rails template API.
+Replaces Minitest with RSpec, FactoryBot, and Faker in a Rails 8 app. Installs and configures the full testing stack and updates the CI workflow if the `main` template has already been applied.
 
-## Available Templates
+## What It Does
 
-| Branch | Description |
-|---|---|
-| [`main`](../../tree/main) | Configures `.gitignore` and GitHub Actions CI with PostgreSQL |
-| [`tailwindcss`](../../tree/tailwindcss) | Applies a custom Tailwind CSS v4 theme — colors, fonts, and animations |
-| [`navbar`](../../tree/navbar) | Adds a responsive sticky navbar with a Stimulus-powered mobile menu |
-| [`authentication`](../../tree/authentication) | Runs Rails 8 built-in auth generator and styles the views with the ivory theme |
-| [`error-pages`](../../tree/error-pages) | Dynamic 404, 422, and 500 error pages styled with the ivory theme |
-| [`flash-message`](../../tree/flash-message) | Adds a Stimulus-powered flash message component |
+1. Adds gems to the `Gemfile`:
+   - `rspec-rails` (test)
+   - `factory_bot_rails` (development, test)
+   - `faker` (development, test)
 
-## Recommended Order
+2. Runs `rails generate rspec:install`, which creates:
+   - `.rspec`
+   - `spec/spec_helper.rb`
+   - `spec/rails_helper.rb`
 
-When setting up a new app, apply templates in this order:
+3. Uncomments the support file autoloader in `spec/rails_helper.rb`
+   ```ruby
+   Dir[Rails.root.join('spec', 'support', '**', '*.rb')].sort.each { |f| require f }
+   ```
 
-```
-1. main           → base git and CI configuration
-2. tailwindcss    → Tailwind theme (required before all UI templates)
-3. navbar         → apply before flash-message for correct z-index stacking
-4. authentication → injects nav links automatically if navbar is present
-5. error-pages    → no dependencies beyond tailwindcss, apply any time
-6. flash-message  → depends on the Tailwind theme and navbar height
-```
+4. Creates `spec/support/factory_bot.rb` — includes `FactoryBot::Syntax::Methods` so factories can be called without the `FactoryBot.` prefix
+
+5. Creates `spec/support/capybara.rb` — configures Capybara with a 5-second wait time and silent Puma server for system specs
+
+6. Updates `.github/workflows/ci.yml` if present — replaces the Minitest test command with `bundle exec rspec`
+
+## Dependencies
+
+- Rails 8
+- The [`main` template](../../tree/main) is optional — if the CI workflow exists, the test command is updated automatically
 
 ## Usage
 
 **Option 1 — Raw URL**
 
-Navigate to the branch, open `template.rb`, click **Raw**, and pass the URL to the `-m` flag or `LOCATION=`.
+Navigate to this branch, open `template.rb`, click **Raw**, and pass the URL.
 
 **Option 2 — Local file**
 
 Copy `template.rb` into your project directory and pass the local path instead.
 
----
-
-## Main Template
-
-Appends `/vendor/bundle` to `.gitignore` and writes a full GitHub Actions CI workflow configured for PostgreSQL. The pipeline includes Brakeman (Ruby security scan), importmap audit (JS dependency scan), RuboCop (linting), and Minitest with system tests.
-
 ### New app
 
 ```bash
-rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/main/template.rb
+rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/rspec/template.rb
 ```
 
 ### Existing app
 
 ```bash
-bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/main/template.rb
+bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/rspec/template.rb
+```
+
+## After Applying
+
+Remove the Minitest directory if it is no longer needed:
+
+```bash
+rm -rf test/
+```
+
+## Writing Tests
+
+**Model spec**
+
+```ruby
+# spec/models/user_spec.rb
+RSpec.describe User, type: :model do
+  it "is valid with a valid email" do
+    user = build(:user)
+    expect(user).to be_valid
+  end
+end
+```
+
+**Factory**
+
+```ruby
+# spec/factories/users.rb
+FactoryBot.define do
+  factory :user do
+    email_address { Faker::Internet.unique.email }
+    password      { "password" }
+  end
+end
+```
+
+**System spec**
+
+```ruby
+# spec/system/sign_in_spec.rb
+RSpec.describe "Sign in", type: :system do
+  let(:user) { create(:user) }
+
+  it "signs in with valid credentials" do
+    visit new_session_path
+    fill_in "Email", with: user.email_address
+    fill_in "Password", with: "password"
+    click_button "Sign in"
+    expect(page).to have_current_path(root_path)
+  end
+end
 ```
 
 ---
 
-## Tailwind CSS Template
-
-See the [`tailwindcss` branch](../../tree/tailwindcss) for full details.
-
-### New app
-
-```bash
-rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/tailwindcss/template.rb
-```
-
-### Existing app
-
-```bash
-bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/tailwindcss/template.rb
-```
-
----
-
-## Navbar Template
-
-See the [`navbar` branch](../../tree/navbar) for full details.
-
-### New app
-
-```bash
-rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/navbar/template.rb
-```
-
-### Existing app
-
-```bash
-bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/navbar/template.rb
-```
-
----
-
-## Authentication Template
-
-See the [`authentication` branch](../../tree/authentication) for full details.
-
-### New app
-
-```bash
-rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/authentication/template.rb
-```
-
-### Existing app
-
-```bash
-bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/authentication/template.rb
-```
-
----
-
-## Error Pages Template
-
-See the [`error-pages` branch](../../tree/error-pages) for full details.
-
-### New app
-
-```bash
-rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/error-pages/template.rb
-```
-
-### Existing app
-
-```bash
-bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/error-pages/template.rb
-```
-
----
-
-## Flash Message Template
-
-See the [`flash-message` branch](../../tree/flash-message) for full details.
-
-### New app
-
-```bash
-rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/flash-message/template.rb
-```
-
-### Existing app
-
-```bash
-bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/flash-message/template.rb
-```
-
----
-
-## Compatibility
-
-- Rails 8+
-- PostgreSQL
-- [`tailwind-rails`](https://github.com/rails/tailwindcss-rails) gem — no Node.js required
+For the full list of available templates see the [main branch](../../tree/main).

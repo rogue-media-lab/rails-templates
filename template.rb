@@ -1,117 +1,66 @@
-# Configures .gitignore and GitHub Actions CI for a Rails 8 + PostgreSQL app.
-# Vendor gems are excluded from git — run `bundle install` after cloning.
+# Replaces Minitest with RSpec, FactoryBot, and Faker in a Rails 8 app.
+# Adds gems, runs the RSpec installer, creates support files for FactoryBot
+# and Capybara, and updates the CI workflow if present.
 
-say "Configuring .gitignore...", :cyan
+say "Adding RSpec, FactoryBot, and Faker gems...", :cyan
 
-append_to_file ".gitignore", <<~GITIGNORE
+gem_group :development, :test do
+  gem "factory_bot_rails"
+  gem "faker"
+end
 
-  # Ignore bundled gems — run bundle install after cloning
-  /vendor/bundle
-GITIGNORE
+gem_group :test do
+  gem "rspec-rails"
+end
 
-say "Updated .gitignore.", :green
+after_bundle do
+  say "Running RSpec installer...", :cyan
+  generate "rspec:install"
+  say "RSpec installed.", :green
 
-say "Writing GitHub Actions CI workflow...", :cyan
+  # --- Uncomment support file loading in rails_helper.rb ---
+  # The generator adds this line commented out by default.
+  uncomment_lines "spec/rails_helper.rb", /Dir\[Rails.root/
 
-ci_yml = <<~YAML
-  name: CI
+  # --- FactoryBot support file ---
+  create_file "spec/support/factory_bot.rb", <<~RUBY
+    RSpec.configure do |config|
+      config.include FactoryBot::Syntax::Methods
+    end
+  RUBY
 
-  on:
-    pull_request:
-    push:
-      branches: [ main ]
+  say "Created spec/support/factory_bot.rb.", :green
 
-  jobs:
-    scan_ruby:
-      runs-on: ubuntu-latest
+  # --- Capybara support file ---
+  create_file "spec/support/capybara.rb", <<~RUBY
+    require "capybara/rspec"
 
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+    Capybara.configure do |config|
+      config.default_max_wait_time = 5
+      config.server = :puma, { Silent: true }
+    end
+  RUBY
 
-        - name: Set up Ruby
-          uses: ruby/setup-ruby@v1
-          with:
-            ruby-version: .ruby-version
-            bundler-cache: true
+  say "Created spec/support/capybara.rb.", :green
 
-        - name: Scan for common Rails security vulnerabilities using static analysis
-          run: bin/brakeman --no-pager
+  # --- Update CI workflow if present ---
+  ci_path = ".github/workflows/ci.yml"
 
-    scan_js:
-      runs-on: ubuntu-latest
+  if File.exist?(ci_path)
+    say "Updating CI workflow to run RSpec...", :cyan
 
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+    # Replace the Minitest test run command with RSpec
+    gsub_file ci_path,
+      "run: bin/rails db:migrate db:test:prepare test test:system",
+      "run: bin/rails db:migrate db:test:prepare && bundle exec rspec"
 
-        - name: Set up Ruby
-          uses: ruby/setup-ruby@v1
-          with:
-            ruby-version: .ruby-version
-            bundler-cache: true
+    say "Updated #{ci_path}.", :green
+  else
+    say "No CI workflow found — skipping. If you apply the main template later,", :yellow
+    say "update the test run command to: bundle exec rspec", :yellow
+  end
 
-        - name: Scan for security vulnerabilities in JavaScript dependencies
-          run: bin/importmap audit
-
-    lint:
-      runs-on: ubuntu-latest
-
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
-
-        - name: Set up Ruby
-          uses: ruby/setup-ruby@v1
-          with:
-            ruby-version: .ruby-version
-            bundler-cache: true
-
-        - name: Lint code for consistent style
-          run: bin/rubocop -f github
-
-    test:
-      runs-on: ubuntu-latest
-
-      services:
-        postgres:
-          image: postgres
-          env:
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: postgres
-          ports:
-            - 5432:5432
-          options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
-
-      steps:
-        - name: Install packages
-          run: sudo apt-get update && sudo apt-get install --no-install-recommends -y google-chrome-stable curl libjemalloc2 libvips postgresql-client
-
-        - name: Checkout code
-          uses: actions/checkout@v4
-
-        - name: Set up Ruby
-          uses: ruby/setup-ruby@v1
-          with:
-            ruby-version: .ruby-version
-            bundler-cache: true
-
-        - name: Run tests
-          env:
-            RAILS_ENV: test
-            DATABASE_URL: postgres://postgres:postgres@localhost:5432
-          run: bin/rails db:migrate db:test:prepare test test:system
-
-        - name: Keep screenshots from failed system tests
-          uses: actions/upload-artifact@v4
-          if: failure()
-          with:
-            name: screenshots
-            path: ${{ github.workspace }}/tmp/screenshots
-            if-no-files-found: ignore
-YAML
-
-create_file ".github/workflows/ci.yml", ci_yml, force: true
-
-say "Created .github/workflows/ci.yml.", :green
-say "\nSetup complete.", :blue
+  say "\nRSpec setup complete.", :blue
+  say "The test/ directory can be removed if it is no longer needed:", :yellow
+  say "  rm -rf test/", :yellow
+end

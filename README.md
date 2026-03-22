@@ -39,11 +39,19 @@ bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-la
 
 ## Using the Theme
 
-Colors and animations are defined as CSS custom properties and referenced via Tailwind's arbitrary value syntax:
+Values defined in `@theme` generate Tailwind utility classes directly — no arbitrary value syntax needed:
 
 ```html
-<div class="bg-[--color-ivory-100] text-[--color-ivory-900]">...</div>
-<div class="animate-[--animate-fade-in]">...</div>
+<!-- Colors -->
+<div class="bg-ivory-100 text-ivory-900 border-ivory-300">...</div>
+<div class="bg-pastel-mint text-green-800">...</div>
+
+<!-- Animations -->
+<div class="animate-fade-in">...</div>
+<div class="animate-slide-up">...</div>
+
+<!-- Font (overrides the default font-sans utility) -->
+<p class="font-sans">Renders in Inter var</p>
 ```
 
 To add or modify values, edit the `@theme` block in `app/assets/stylesheets/application.tailwind.css`.

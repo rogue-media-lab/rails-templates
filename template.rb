@@ -26,7 +26,7 @@ tailwind_css = <<~CSS
     --color-pastel-sky: #cce7ff;
     --color-pastel-sage: #e8f5e8;
 
-    --font-family-sans: 'Inter var', ui-sans-serif, system-ui, sans-serif;
+    --font-sans: 'Inter var', ui-sans-serif, system-ui, sans-serif;
 
     --animate-fade-in: fadeIn 0.5s ease-in-out;
     --animate-slide-up: slideUp 0.3s ease-out;

@@ -12,6 +12,7 @@ A collection of [Rails application templates](https://guides.rubyonrails.org/rai
 | [`authentication`](../../tree/authentication) | Runs Rails 8 built-in auth generator and styles the views with the ivory theme |
 | [`error-pages`](../../tree/error-pages) | Dynamic 404, 422, and 500 error pages styled with the ivory theme |
 | [`rspec`](../../tree/rspec) | Replaces Minitest with RSpec, FactoryBot, and Faker; updates CI |
+| [`letter-opener`](../../tree/letter-opener) | Configures ActionMailer to open emails in the browser during development |
 | [`flash-message`](../../tree/flash-message) | Adds a Stimulus-powered flash message component |
 
 ## Recommended Order
@@ -25,7 +26,8 @@ When setting up a new app, apply templates in this order:
 4. authentication → injects nav links automatically if navbar is present
 5. error-pages    → no dependencies beyond tailwindcss, apply any time
 6. rspec          → apply after main so CI is updated automatically
-7. flash-message  → depends on the Tailwind theme and navbar height
+7. letter-opener  → no dependencies, apply any time
+8. flash-message  → depends on the Tailwind theme and navbar height
 ```
 
 ## Usage
@@ -144,6 +146,24 @@ rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/
 
 ```bash
 bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/rspec/template.rb
+```
+
+---
+
+## Letter Opener Template
+
+See the [`letter-opener` branch](../../tree/letter-opener) for full details.
+
+### New app
+
+```bash
+rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/letter-opener/template.rb
+```
+
+### Existing app
+
+```bash
+bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/letter-opener/template.rb
 ```
 
 ---

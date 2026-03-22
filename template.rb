@@ -36,7 +36,7 @@ say "Created app/javascript/controllers/flash_messages_controller.js.", :green
 # --- ERB Partial ---
 create_file "app/views/shared/_flash_messages.html.erb", <<~ERB
   <% if notice %>
-    <div class="bg-pastel-mint border border-green-200 text-green-800 px-4 py-3 rounded-md shadow-lg max-w-sm animate-[--animate-slide-up]"
+    <div class="bg-pastel-mint border border-green-200 text-green-800 px-4 py-3 rounded-md shadow-lg max-w-sm animate-slide-up"
          data-flash-messages-target="message"
          data-action="click->flash-messages#dismiss">
       <div class="flex items-center justify-between">
@@ -56,7 +56,7 @@ create_file "app/views/shared/_flash_messages.html.erb", <<~ERB
   <% end %>
 
   <% if alert %>
-    <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-md shadow-lg max-w-sm animate-[--animate-slide-up]"
+    <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-md shadow-lg max-w-sm animate-slide-up"
          data-flash-messages-target="message"
          data-action="click->flash-messages#dismiss">
       <div class="flex items-center justify-between">

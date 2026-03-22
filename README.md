@@ -1,12 +1,17 @@
 # Rails 8 Application Templates
 
+![Rails](https://img.shields.io/badge/Rails-8-cc0000?logo=rubyonrails&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-336791?logo=postgresql&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-green)
+
 A collection of [Rails application templates](https://guides.rubyonrails.org/rails_application_templates.html) for scaffolding and configuring Rails 8 apps. Each branch contains a `template.rb` that can be applied to a new or existing app using the Rails template API.
 
 ## Available Templates
 
 | Branch | Description |
 |---|---|
-| [`main`](../../tree/main) | Configures `.gitignore` and GitHub Actions CI with PostgreSQL |
+| [`main`](../../tree/main) | Root template — applies all templates interactively in the recommended order |
+| [`base`](../../tree/base) | Configures `.gitignore` and GitHub Actions CI with PostgreSQL |
 | [`tailwindcss`](../../tree/tailwindcss) | Applies a custom Tailwind CSS v4 theme — colors, fonts, and animations |
 | [`navbar`](../../tree/navbar) | Adds a responsive sticky navbar with a Stimulus-powered mobile menu |
 | [`authentication`](../../tree/authentication) | Runs Rails 8 built-in auth generator and styles the views with the ivory theme |
@@ -17,172 +22,40 @@ A collection of [Rails application templates](https://guides.rubyonrails.org/rai
 
 ## Recommended Order
 
-When setting up a new app, apply templates in this order:
+When applying templates individually, apply them in this order:
 
 ```
-1. main           → base git and CI configuration
+1. base           → .gitignore and CI configuration
 2. tailwindcss    → Tailwind theme (required before all UI templates)
 3. navbar         → apply before flash-message for correct z-index stacking
 4. authentication → injects nav links automatically if navbar is present
 5. error-pages    → no dependencies beyond tailwindcss, apply any time
-6. rspec          → apply after main so CI is updated automatically
+6. rspec          → apply after base so CI is updated automatically
 7. letter-opener  → no dependencies, apply any time
 8. flash-message  → depends on the Tailwind theme and navbar height
 ```
 
+The root template on this branch handles the ordering automatically.
+
 ## Usage
 
-**Option 1 — Raw URL**
+**Option 1 — Root template (recommended)**
 
-Navigate to the branch, open `template.rb`, click **Raw**, and pass the URL to the `-m` flag or `LOCATION=`.
-
-**Option 2 — Local file**
-
-Copy `template.rb` into your project directory and pass the local path instead.
-
----
-
-## Main Template
-
-Appends `/vendor/bundle` to `.gitignore` and writes a full GitHub Actions CI workflow configured for PostgreSQL. The pipeline includes Brakeman (Ruby security scan), importmap audit (JS dependency scan), RuboCop (linting), and Minitest with system tests.
-
-### New app
+Applies all templates interactively in a single command:
 
 ```bash
 rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/main/template.rb
 ```
 
-### Existing app
+Or on an existing app:
 
 ```bash
 bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/main/template.rb
 ```
 
----
+**Option 2 — Individual templates**
 
-## Tailwind CSS Template
-
-See the [`tailwindcss` branch](../../tree/tailwindcss) for full details.
-
-### New app
-
-```bash
-rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/tailwindcss/template.rb
-```
-
-### Existing app
-
-```bash
-bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/tailwindcss/template.rb
-```
-
----
-
-## Navbar Template
-
-See the [`navbar` branch](../../tree/navbar) for full details.
-
-### New app
-
-```bash
-rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/navbar/template.rb
-```
-
-### Existing app
-
-```bash
-bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/navbar/template.rb
-```
-
----
-
-## Authentication Template
-
-See the [`authentication` branch](../../tree/authentication) for full details.
-
-### New app
-
-```bash
-rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/authentication/template.rb
-```
-
-### Existing app
-
-```bash
-bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/authentication/template.rb
-```
-
----
-
-## Error Pages Template
-
-See the [`error-pages` branch](../../tree/error-pages) for full details.
-
-### New app
-
-```bash
-rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/error-pages/template.rb
-```
-
-### Existing app
-
-```bash
-bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/error-pages/template.rb
-```
-
----
-
-## RSpec Template
-
-See the [`rspec` branch](../../tree/rspec) for full details.
-
-### New app
-
-```bash
-rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/rspec/template.rb
-```
-
-### Existing app
-
-```bash
-bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/rspec/template.rb
-```
-
----
-
-## Letter Opener Template
-
-See the [`letter-opener` branch](../../tree/letter-opener) for full details.
-
-### New app
-
-```bash
-rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/letter-opener/template.rb
-```
-
-### Existing app
-
-```bash
-bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/letter-opener/template.rb
-```
-
----
-
-## Flash Message Template
-
-See the [`flash-message` branch](../../tree/flash-message) for full details.
-
-### New app
-
-```bash
-rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/flash-message/template.rb
-```
-
-### Existing app
-
-```bash
-bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/flash-message/template.rb
-```
+Navigate to the branch for the template you want, open `template.rb`, click **Raw**, and pass the URL to the `-m` flag or `LOCATION=`. See each branch README for branch-specific usage instructions.
 
 ---
 

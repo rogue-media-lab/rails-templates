@@ -1,117 +1,81 @@
-# Configures .gitignore and GitHub Actions CI for a Rails 8 + PostgreSQL app.
-# Vendor gems are excluded from git — run `bundle install` after cloning.
+# Rails 8 application template — Rogue Media Lab
+#
+# Applies all available templates in the recommended order.
+# Each template is opt-in. Press Enter to accept or type 'n' to skip.
+#
+# Recommended order:
+#   base          → .gitignore and GitHub Actions CI
+#   tailwindcss   → Tailwind CSS v4 theme (required before all UI templates)
+#   navbar        → sticky navbar with mobile menu
+#   authentication→ Rails 8 built-in auth with styled views
+#   error-pages   → dynamic 404/422/500 pages
+#   rspec         → RSpec, FactoryBot, and Faker (replaces Minitest)
+#   letter-opener → opens emails in the browser during development
+#   flash-message → Stimulus-powered flash message component
 
-say "Configuring .gitignore...", :cyan
+BASE_URL = "https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads"
 
-append_to_file ".gitignore", <<~GITIGNORE
+say "\nRogue Media Lab — Rails 8 Templates", :blue
+say "=====================================", :blue
+say "Select which templates to apply. Press Enter to accept (Y) or type 'n' to skip.\n\n", :blue
 
-  # Ignore bundled gems — run bundle install after cloning
-  /vendor/bundle
-GITIGNORE
+TEMPLATES = [
+  {
+    name: "base",
+    label: "Base",
+    description: "configures .gitignore and GitHub Actions CI"
+  },
+  {
+    name: "tailwindcss",
+    label: "Tailwind CSS",
+    description: "custom Tailwind CSS v4 theme — colors, fonts, and animations (required for all UI templates)"
+  },
+  {
+    name: "navbar",
+    label: "Navbar",
+    description: "responsive sticky navbar with Stimulus-powered mobile menu"
+  },
+  {
+    name: "authentication",
+    label: "Authentication",
+    description: "Rails 8 built-in auth generator with Tailwind-styled views"
+  },
+  {
+    name: "error-pages",
+    label: "Error Pages",
+    description: "dynamic 404, 422, and 500 error pages styled with the ivory theme"
+  },
+  {
+    name: "rspec",
+    label: "RSpec",
+    description: "replaces Minitest with RSpec, FactoryBot, and Faker; updates CI"
+  },
+  {
+    name: "letter-opener",
+    label: "Letter Opener",
+    description: "opens emails in the browser during development"
+  },
+  {
+    name: "flash-message",
+    label: "Flash Message",
+    description: "Stimulus-powered flash message component with auto-dismiss"
+  }
+]
 
-say "Updated .gitignore.", :green
+selected = TEMPLATES.select do |t|
+  answer = ask("  Apply #{t[:label]}? #{t[:description]} [Y/n]:")
+  answer.strip.downcase != "n"
+end
 
-say "Writing GitHub Actions CI workflow...", :cyan
+if selected.empty?
+  say "\nNo templates selected. Nothing to apply.", :yellow
+else
+  say "\nApplying #{selected.length} template(s)...\n", :cyan
 
-ci_yml = <<~YAML
-  name: CI
+  selected.each do |t|
+    say "\n--- Applying #{t[:label]} ---", :cyan
+    apply "#{BASE_URL}/#{t[:name]}/template.rb"
+  end
 
-  on:
-    pull_request:
-    push:
-      branches: [ main ]
-
-  jobs:
-    scan_ruby:
-      runs-on: ubuntu-latest
-
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
-
-        - name: Set up Ruby
-          uses: ruby/setup-ruby@v1
-          with:
-            ruby-version: .ruby-version
-            bundler-cache: true
-
-        - name: Scan for common Rails security vulnerabilities using static analysis
-          run: bin/brakeman --no-pager
-
-    scan_js:
-      runs-on: ubuntu-latest
-
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
-
-        - name: Set up Ruby
-          uses: ruby/setup-ruby@v1
-          with:
-            ruby-version: .ruby-version
-            bundler-cache: true
-
-        - name: Scan for security vulnerabilities in JavaScript dependencies
-          run: bin/importmap audit
-
-    lint:
-      runs-on: ubuntu-latest
-
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
-
-        - name: Set up Ruby
-          uses: ruby/setup-ruby@v1
-          with:
-            ruby-version: .ruby-version
-            bundler-cache: true
-
-        - name: Lint code for consistent style
-          run: bin/rubocop -f github
-
-    test:
-      runs-on: ubuntu-latest
-
-      services:
-        postgres:
-          image: postgres
-          env:
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: postgres
-          ports:
-            - 5432:5432
-          options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
-
-      steps:
-        - name: Install packages
-          run: sudo apt-get update && sudo apt-get install --no-install-recommends -y google-chrome-stable curl libjemalloc2 libvips postgresql-client
-
-        - name: Checkout code
-          uses: actions/checkout@v4
-
-        - name: Set up Ruby
-          uses: ruby/setup-ruby@v1
-          with:
-            ruby-version: .ruby-version
-            bundler-cache: true
-
-        - name: Run tests
-          env:
-            RAILS_ENV: test
-            DATABASE_URL: postgres://postgres:postgres@localhost:5432
-          run: bin/rails db:migrate db:test:prepare test test:system
-
-        - name: Keep screenshots from failed system tests
-          uses: actions/upload-artifact@v4
-          if: failure()
-          with:
-            name: screenshots
-            path: ${{ github.workspace }}/tmp/screenshots
-            if-no-files-found: ignore
-YAML
-
-create_file ".github/workflows/ci.yml", ci_yml, force: true
-
-say "Created .github/workflows/ci.yml.", :green
-say "\nSetup complete.", :blue
+  say "\nAll done. Templates applied: #{selected.map { |t| t[:label] }.join(', ')}", :green
+end

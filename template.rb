@@ -1,117 +1,88 @@
-# Configures .gitignore and GitHub Actions CI for a Rails 8 + PostgreSQL app.
-# Vendor gems are excluded from git — run `bundle install` after cloning.
+# Adds a responsive navbar to a Rails 8 app.
+# Creates a Stimulus controller for the mobile menu and a shared ERB partial,
+# then injects a render call into the application layout.
+# Designed to work with the tailwindcss template — uses the ivory color theme.
 
-say "Configuring .gitignore...", :cyan
+say "Setting up navbar component...", :cyan
 
-append_to_file ".gitignore", <<~GITIGNORE
+# --- Stimulus Controller ---
+create_file "app/javascript/controllers/navbar_controller.js", <<~JS
+  import { Controller } from "@hotwired/stimulus"
 
-  # Ignore bundled gems — run bundle install after cloning
-  /vendor/bundle
-GITIGNORE
+  export default class extends Controller {
+    static targets = ["menu", "openIcon", "closeIcon"]
 
-say "Updated .gitignore.", :green
+    toggle() {
+      this.menuTarget.classList.toggle("hidden")
+      this.openIconTarget.classList.toggle("hidden")
+      this.closeIconTarget.classList.toggle("hidden")
+    }
+  }
+JS
 
-say "Writing GitHub Actions CI workflow...", :cyan
+say "Created app/javascript/controllers/navbar_controller.js.", :green
 
-ci_yml = <<~YAML
-  name: CI
+# --- Navbar Partial ---
+app_name = Rails.application.class.module_parent_name.underscore.humanize rescue "My App"
 
-  on:
-    pull_request:
-    push:
-      branches: [ main ]
+create_file "app/views/shared/_navbar.html.erb", <<~ERB
+  <nav class="sticky top-0 z-40 bg-ivory-100 border-b border-ivory-300" data-controller="navbar">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
 
-  jobs:
-    scan_ruby:
-      runs-on: ubuntu-latest
+        <%# Brand %>
+        <div class="flex items-center">
+          <%= link_to root_path, class: "text-ivory-900 font-bold text-lg tracking-tight hover:text-ivory-700 transition-colors" do %>
+            #{app_name}
+          <% end %>
+        </div>
 
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+        <%# Desktop nav links %>
+        <div class="hidden sm:flex sm:items-center sm:gap-1">
+          <%= link_to "Home", root_path,
+                class: "text-ivory-700 hover:text-ivory-900 hover:bg-ivory-200 px-3 py-2 rounded-md text-sm font-medium transition-colors" %>
+        </div>
 
-        - name: Set up Ruby
-          uses: ruby/setup-ruby@v1
-          with:
-            ruby-version: .ruby-version
-            bundler-cache: true
+        <%# Mobile menu button %>
+        <div class="flex items-center sm:hidden">
+          <button data-action="click->navbar#toggle"
+                  class="text-ivory-700 hover:text-ivory-900 hover:bg-ivory-200 p-2 rounded-md transition-colors"
+                  aria-label="Toggle navigation menu">
 
-        - name: Scan for common Rails security vulnerabilities using static analysis
-          run: bin/brakeman --no-pager
+            <%# Hamburger icon (shown by default) %>
+            <svg data-navbar-target="openIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
 
-    scan_js:
-      runs-on: ubuntu-latest
+            <%# Close icon (hidden by default) %>
+            <svg data-navbar-target="closeIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
 
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+          </button>
+        </div>
 
-        - name: Set up Ruby
-          uses: ruby/setup-ruby@v1
-          with:
-            ruby-version: .ruby-version
-            bundler-cache: true
+      </div>
+    </div>
 
-        - name: Scan for security vulnerabilities in JavaScript dependencies
-          run: bin/importmap audit
+    <%# Mobile menu (hidden by default) %>
+    <div data-navbar-target="menu" class="hidden sm:hidden border-t border-ivory-300 bg-ivory-50">
+      <div class="px-2 py-2 space-y-1">
+        <%= link_to "Home", root_path,
+              class: "block text-ivory-700 hover:text-ivory-900 hover:bg-ivory-200 px-3 py-2 rounded-md text-sm font-medium transition-colors" %>
+      </div>
+    </div>
+  </nav>
+ERB
 
-    lint:
-      runs-on: ubuntu-latest
+say "Created app/views/shared/_navbar.html.erb.", :green
 
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+# --- Inject into Layout ---
+# Insert before <%= yield %> so the navbar sits above the main content
+# regardless of what other templates have already injected into the layout.
+insert_into_file "app/views/layouts/application.html.erb",
+  "    <%= render \"shared/navbar\" %>\n",
+  before: "    <%= yield %>"
 
-        - name: Set up Ruby
-          uses: ruby/setup-ruby@v1
-          with:
-            ruby-version: .ruby-version
-            bundler-cache: true
-
-        - name: Lint code for consistent style
-          run: bin/rubocop -f github
-
-    test:
-      runs-on: ubuntu-latest
-
-      services:
-        postgres:
-          image: postgres
-          env:
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: postgres
-          ports:
-            - 5432:5432
-          options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
-
-      steps:
-        - name: Install packages
-          run: sudo apt-get update && sudo apt-get install --no-install-recommends -y google-chrome-stable curl libjemalloc2 libvips postgresql-client
-
-        - name: Checkout code
-          uses: actions/checkout@v4
-
-        - name: Set up Ruby
-          uses: ruby/setup-ruby@v1
-          with:
-            ruby-version: .ruby-version
-            bundler-cache: true
-
-        - name: Run tests
-          env:
-            RAILS_ENV: test
-            DATABASE_URL: postgres://postgres:postgres@localhost:5432
-          run: bin/rails db:migrate db:test:prepare test test:system
-
-        - name: Keep screenshots from failed system tests
-          uses: actions/upload-artifact@v4
-          if: failure()
-          with:
-            name: screenshots
-            path: ${{ github.workspace }}/tmp/screenshots
-            if-no-files-found: ignore
-YAML
-
-create_file ".github/workflows/ci.yml", ci_yml, force: true
-
-say "Created .github/workflows/ci.yml.", :green
-say "\nSetup complete.", :blue
+say "Injected navbar into app/views/layouts/application.html.erb.", :green
+say "\nNavbar setup complete.", :blue

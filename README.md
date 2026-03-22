@@ -1,113 +1,77 @@
-# Rails 8 Application Templates
+# Authentication Template
 
-A collection of [Rails application templates](https://guides.rubyonrails.org/rails_application_templates.html) for scaffolding and configuring Rails 8 apps. Each branch contains a `template.rb` that can be applied to a new or existing app using the Rails template API.
+Sets up Rails 8 built-in authentication and styles the generated views with the ivory Tailwind theme. Uses the first-party `rails generate authentication` generator — no Devise or third-party gems required.
 
-## Available Templates
+## What It Does
 
-| Branch | Description |
-|---|---|
-| [`main`](../../tree/main) | Configures `.gitignore` and GitHub Actions CI with PostgreSQL |
-| [`tailwindcss`](../../tree/tailwindcss) | Applies a custom Tailwind CSS v4 theme — colors, fonts, and animations |
-| [`navbar`](../../tree/navbar) | Adds a responsive sticky navbar with a Stimulus-powered mobile menu |
-| [`flash-message`](../../tree/flash-message) | Adds a Stimulus-powered flash message component |
+1. Runs `rails generate authentication`, which creates:
+   - `User` and `Session` models with migrations
+   - `SessionsController` (sign in / sign out)
+   - `PasswordsController` (forgot password / reset password)
+   - `Authentication` concern included in `ApplicationController`
+   - Mailer for password reset emails
 
-## Recommended Order
+2. Runs `db:migrate`
 
-When setting up a new app, apply templates in this order:
+3. Overwrites the generated views with Tailwind-styled versions:
+   - `app/views/sessions/new.html.erb` — sign-in form
+   - `app/views/passwords/new.html.erb` — forgot password form
+   - `app/views/passwords/edit.html.erb` — reset password form
 
-```
-1. main          → base git and CI configuration
-2. tailwindcss   → Tailwind theme (required before navbar and flash-message)
-3. navbar        → apply before flash-message for correct z-index stacking
-4. flash-message → depends on the Tailwind theme and navbar height
-```
+4. Injects sign-in / sign-out links into the navbar if `app/views/shared/_navbar.html.erb` exists (applied by the [`navbar` template](../../tree/navbar))
+   - Uses `Current.session` to conditionally render the correct link
+   - Adds links to both the desktop and mobile nav sections
+   - Skipped gracefully if the navbar partial is not present
+
+## Dependencies
+
+- Rails 8
+- The [`tailwindcss` template](../../tree/tailwindcss) applied first — provides the ivory color theme used in the styled views
+- The [`navbar` template](../../tree/navbar) is optional — auth links are injected automatically if the navbar partial is present
 
 ## Usage
 
 **Option 1 — Raw URL**
 
-Navigate to the branch, open `template.rb`, click **Raw**, and pass the URL to the `-m` flag or `LOCATION=`.
+Navigate to this branch, open `template.rb`, click **Raw**, and pass the URL.
 
 **Option 2 — Local file**
 
 Copy `template.rb` into your project directory and pass the local path instead.
 
----
-
-## Main Template
-
-Appends `/vendor/bundle` to `.gitignore` and writes a full GitHub Actions CI workflow configured for PostgreSQL. The pipeline includes Brakeman (Ruby security scan), importmap audit (JS dependency scan), RuboCop (linting), and Minitest with system tests.
-
 ### New app
 
 ```bash
-rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/main/template.rb
+rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/authentication/template.rb
 ```
 
 ### Existing app
 
 ```bash
-bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/main/template.rb
+bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/authentication/template.rb
+```
+
+## Protecting Routes
+
+The `Authentication` concern is included in `ApplicationController` by default. Use `allow_unauthenticated_access` to open specific actions:
+
+```ruby
+class HomeController < ApplicationController
+  allow_unauthenticated_access only: :index
+
+  def index
+  end
+end
+```
+
+## Creating the First User
+
+Rails 8 authentication does not ship with a registration flow. Create your first user in the console or via seeds:
+
+```ruby
+User.create!(email_address: "you@example.com", password: "your_password")
 ```
 
 ---
 
-## Tailwind CSS Template
-
-See the [`tailwindcss` branch](../../tree/tailwindcss) for full details.
-
-### New app
-
-```bash
-rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/tailwindcss/template.rb
-```
-
-### Existing app
-
-```bash
-bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/tailwindcss/template.rb
-```
-
----
-
-## Navbar Template
-
-See the [`navbar` branch](../../tree/navbar) for full details.
-
-### New app
-
-```bash
-rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/navbar/template.rb
-```
-
-### Existing app
-
-```bash
-bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/navbar/template.rb
-```
-
----
-
-## Flash Message Template
-
-See the [`flash-message` branch](../../tree/flash-message) for full details.
-
-### New app
-
-```bash
-rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/flash-message/template.rb
-```
-
-### Existing app
-
-```bash
-bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/flash-message/template.rb
-```
-
----
-
-## Compatibility
-
-- Rails 8+
-- PostgreSQL
-- [`tailwind-rails`](https://github.com/rails/tailwindcss-rails) gem — no Node.js required
+For the full list of available templates see the [main branch](../../tree/main).

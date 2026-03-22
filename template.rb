@@ -23,11 +23,22 @@ end
 
 say "\nSetting up blog...", :cyan
 
-# --- Gems ---
-say "Adding image_processing gem...", :cyan
-gem "image_processing", "~> 1.2"
-
 after_bundle do
+  # --- image_processing gem ---
+  # Added here rather than at the top level to avoid triggering an extra
+  # bundle install cycle that would re-fire all other templates' after_bundle hooks.
+  unless File.read("Gemfile").include?("image_processing")
+    say "Adding image_processing gem...", :cyan
+    inject_into_file "Gemfile", "\ngem \"image_processing\", \"~> 1.2\"\n", before: /^group :development/
+    run "bundle install --quiet"
+  end
+
+  # --- Idempotency guard ---
+  if File.exist?("app/models/post.rb")
+    say "Blog already configured — skipping.", :yellow
+    next
+  end
+
   # --- Admin column on users ---
   say "Adding admin column to users...", :cyan
   generate :migration, "AddAdminToUsers admin:boolean"

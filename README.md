@@ -9,6 +9,7 @@ A collection of [Rails application templates](https://guides.rubyonrails.org/rai
 | [`main`](../../tree/main) | Configures `.gitignore` and GitHub Actions CI with PostgreSQL |
 | [`tailwindcss`](../../tree/tailwindcss) | Applies a custom Tailwind CSS v4 theme — colors, fonts, and animations |
 | [`navbar`](../../tree/navbar) | Adds a responsive sticky navbar with a Stimulus-powered mobile menu |
+| [`authentication`](../../tree/authentication) | Runs Rails 8 built-in auth generator and styles the views with the ivory theme |
 | [`flash-message`](../../tree/flash-message) | Adds a Stimulus-powered flash message component |
 
 ## Recommended Order
@@ -16,10 +17,11 @@ A collection of [Rails application templates](https://guides.rubyonrails.org/rai
 When setting up a new app, apply templates in this order:
 
 ```
-1. main          → base git and CI configuration
-2. tailwindcss   → Tailwind theme (required before navbar and flash-message)
-3. navbar        → apply before flash-message for correct z-index stacking
-4. flash-message → depends on the Tailwind theme and navbar height
+1. main           → base git and CI configuration
+2. tailwindcss    → Tailwind theme (required before all UI templates)
+3. navbar         → apply before flash-message for correct z-index stacking
+4. authentication → injects nav links automatically if navbar is present
+5. flash-message  → depends on the Tailwind theme and navbar height
 ```
 
 ## Usage
@@ -84,6 +86,24 @@ rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/
 
 ```bash
 bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/navbar/template.rb
+```
+
+---
+
+## Authentication Template
+
+See the [`authentication` branch](../../tree/authentication) for full details.
+
+### New app
+
+```bash
+rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/authentication/template.rb
+```
+
+### Existing app
+
+```bash
+bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/authentication/template.rb
 ```
 
 ---

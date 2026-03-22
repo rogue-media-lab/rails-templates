@@ -1,22 +1,93 @@
-# Rails 8 Templates
-Rails 8 now has [Application templates](https://guides.rubyonrails.org/rails_application_templates.html). This is a great way to quickly and easily modify your fresh or existing app. Use this api to write reusable DSL to generate or customize your Rails app. I have created a few of these that I use. They are all called template.rb and each branch in this repo contains a different template.
+# Rails 8 Application Templates
 
-## Main Template
-This template will modify the git environment and git workflow. Specifically it will add a line to the gitignore to ignore the gems in bundle. There is no need to push this weight to github. Just run bundle install when cloning the repo. It will also modify the workflow to run bundle after grabbing the code when performing the action.
+A collection of [Rails application templates](https://guides.rubyonrails.org/rails_application_templates.html) for scaffolding and configuring Rails 8 apps. Each branch contains a `template.rb` that can be applied to a new or existing app using the Rails template API.
 
-The main branch template is just the base version I use when building any default app I want to play, learn, or explore with. This template will rewrite two default files. The gitignore file to add the line to ignore the bundle folder inside the vendor folder. It will also add some configuration to the ci.yml file for the github workflow to set up pg and run bundle when setting up ruby by grabbing the code before the ruby setup and setting the cache to true.
+## Available Templates
 
-## Two ways to use
-1. Open the preferred branch and click on the template.rb file. Click on the "*raw*" button and use that url in the command, passing the -m flag.
-2. Open the preferred branch and copy the template.rb code. Create a template.rb file in the folder you are going to create the new app and pass it in the command.
+| Branch | Description |
+|---|---|
+| [`main`](../../tree/main) | Configures `.gitignore` and GitHub Actions CI with PostgreSQL |
+| [`tailwindcss`](../../tree/tailwindcss) | Applies a custom Tailwind CSS v4 theme — colors, fonts, and animations |
+| [`flash-message`](../../tree/flash-message) | Adds a Stimulus-powered flash message component |
 
-## Command for existing rails app
-```bash
-bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/main/template.rb
+## Recommended Order
+
+When setting up a new app, apply templates in this order:
+
+```
+1. main          → base git and CI configuration
+2. tailwindcss   → Tailwind theme (required before flash-message)
+3. flash-message → depends on the Tailwind theme from step 2
 ```
 
-## Command for new rails app
+## Usage
+
+**Option 1 — Raw URL**
+
+Navigate to the branch, open `template.rb`, click **Raw**, and pass the URL to the `-m` flag or `LOCATION=`.
+
+**Option 2 — Local file**
+
+Copy `template.rb` into your project directory and pass the local path instead.
+
+---
+
+## Main Template
+
+Appends `/vendor/bundle` to `.gitignore` and writes a full GitHub Actions CI workflow configured for PostgreSQL. The pipeline includes Brakeman (Ruby security scan), importmap audit (JS dependency scan), RuboCop (linting), and Minitest with system tests.
+
+### New app
+
 ```bash
 rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/main/template.rb
 ```
 
+### Existing app
+
+```bash
+bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/main/template.rb
+```
+
+---
+
+## Tailwind CSS Template
+
+See the [`tailwindcss` branch](../../tree/tailwindcss) for full details.
+
+### New app
+
+```bash
+rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/tailwindcss/template.rb
+```
+
+### Existing app
+
+```bash
+bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/tailwindcss/template.rb
+```
+
+---
+
+## Flash Message Template
+
+See the [`flash-message` branch](../../tree/flash-message) for full details.
+
+### New app
+
+```bash
+rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/flash-message/template.rb
+```
+
+### Existing app
+
+```bash
+bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/flash-message/template.rb
+```
+
+---
+
+## Compatibility
+
+- Rails 8+
+- PostgreSQL
+- [`tailwind-rails`](https://github.com/rails/tailwindcss-rails) gem — no Node.js required

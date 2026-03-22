@@ -1,20 +1,53 @@
-# Rails 8 Templates
-Rails 8 now has [Application templates](https://guides.rubyonrails.org/rails_application_templates.html). This is a great way to quickly and easily modify your fresh or existing app. Use this api to write reusable DSL to generate or customize your Rails app. I have created a few of these that I use. They are all called template.rb and each branch in this repo contains a different template.
+# Tailwind CSS v4 Theme Template
 
-## Tailwindcss Template
-This template will create the application.css file at `app/assets/tailwind/application.css`. It will include a basic theme configuration for Tailwind. It will also create a `tailwind-config.md` document in the root with instructions on how to use and modify the theme. For Rails 8, this gets you up and running quickly with Tailwind as the basic configuration is preset. Open the app and start using Tailwind!
+Applies a custom Tailwind CSS v4 `@theme` to a Rails 8 app using the `tailwind-rails` gem. Overwrites `app/assets/stylesheets/application.tailwind.css` with a preset color palette, font stack, and animation utilities.
 
-## Two ways to use
-1. Open the preferred branch and click on the template.rb file. Click on the "*raw*" button and use that url in the command, passing the -m flag.
-2. Open the preferred branch and copy the template.rb code. Create a template.rb file in the folder you are going to create the new app and pass it in the command.
+## What It Does
 
-## Command for existing rails app
-```bash
-bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/tailwindcss/template.rb
-```
+- Writes `app/assets/stylesheets/application.tailwind.css` with a custom `@theme` containing:
+  - **Ivory scale** — 9-step neutral palette (50–900)
+  - **Pastel accents** — pink, lavender, mint, peach, sky, sage
+  - **Font stack** — Inter var as the default sans-serif
+  - **Animations** — `fadeIn` and `slideUp` utilities via CSS custom properties
 
-## Command for new rails app
+## Dependencies
+
+- Rails 8 with the `tailwind-rails` gem (`rails new my-app -c tailwind`)
+- No Node.js required — uses the standalone Tailwind CSS CLI bundled with `tailwind-rails`
+
+## Usage
+
+**Option 1 — Raw URL**
+
+Navigate to this branch, open `template.rb`, click **Raw**, and pass the URL.
+
+**Option 2 — Local file**
+
+Copy `template.rb` into your project directory and pass the local path instead.
+
+### New app
+
 ```bash
 rails new my-app -d postgresql -c tailwind -m https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/tailwindcss/template.rb
 ```
 
+### Existing app
+
+```bash
+bin/rails app:template LOCATION=https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads/tailwindcss/template.rb
+```
+
+## Using the Theme
+
+Colors and animations are defined as CSS custom properties and referenced via Tailwind's arbitrary value syntax:
+
+```html
+<div class="bg-[--color-ivory-100] text-[--color-ivory-900]">...</div>
+<div class="animate-[--animate-fade-in]">...</div>
+```
+
+To add or modify values, edit the `@theme` block in `app/assets/stylesheets/application.tailwind.css`.
+
+---
+
+For the full list of available templates see the [main branch](../../tree/main).

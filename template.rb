@@ -30,7 +30,10 @@ create_file "config/database.yml", <<~YAML
     host: <%= ENV["DATABASE_HOST"] %>
 YAML
 
-rails_command "db:create"
+# Drop any existing database with the same name (leftover from a previous run)
+# then create fresh. Safe for new apps — do not apply this template to an app
+# with data you need to keep.
+run "bin/rails db:drop 2>/dev/null; bin/rails db:create"
 say "database.yml configured and databases created.", :green
 
 say "Configuring .gitignore...", :cyan

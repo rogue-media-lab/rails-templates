@@ -55,11 +55,7 @@ create_file "app/views/sessions/new.html.erb", force: true do
                     class: "#{INPUT_CLASS}" %>
             </div>
 
-            <div class="flex items-center justify-between">
-              <label class="flex items-center gap-2 text-sm text-ivory-600 cursor-pointer">
-                <%= form.check_box :remember_me, class: "h-4 w-4 border-ivory-300 rounded" %>
-                Remember me
-              </label>
+            <div class="flex justify-end">
               <%= link_to "Forgot password?", new_password_path,
                     class: "text-sm text-ivory-600 hover:text-ivory-900 transition-colors" %>
             </div>
@@ -118,7 +114,7 @@ create_file "app/views/passwords/edit.html.erb", force: true do
       <div class="#{CARD_INNER}">
         <h1 class="text-2xl font-bold text-ivory-900 mb-8 text-center">Reset password</h1>
 
-        <%= form_with url: password_path(params[:token]), method: :put do |form| %>
+        <%= form_with url: password_path(params[:token]), method: :patch do |form| %>
           <div class="space-y-5">
 
             <div>

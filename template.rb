@@ -12,6 +12,7 @@
 #   rspec         → RSpec, FactoryBot, and Faker (replaces Minitest)
 #   letter-opener → opens emails in the browser during development
 #   flash-message → Stimulus-powered flash message component
+#   blog          → full blog with admin dashboard (requires tailwindcss + authentication)
 
 BASE_URL = "https://raw.githubusercontent.com/rogue-media-lab/rails-templates/refs/heads"
 
@@ -59,6 +60,11 @@ TEMPLATES = [
     name: "flash-message",
     label: "Flash Message",
     description: "Stimulus-powered flash message component with auto-dismiss"
+  },
+  {
+    name: "blog",
+    label: "Blog",
+    description: "full blog with admin dashboard, Post CRUD, Action Text, and Active Storage (requires tailwindcss + authentication)"
   }
 ]
 

@@ -19,6 +19,7 @@ A collection of [Rails application templates](https://guides.rubyonrails.org/rai
 | [`rspec`](../../tree/rspec) | Replaces Minitest with RSpec, FactoryBot, and Faker; updates CI |
 | [`letter-opener`](../../tree/letter-opener) | Configures ActionMailer to open emails in the browser during development |
 | [`flash-message`](../../tree/flash-message) | Adds a Stimulus-powered flash message component |
+| [`blog`](../../tree/blog) | Full blog with admin dashboard, Post CRUD, Action Text body, and Active Storage cover images |
 
 ## Recommended Order
 
@@ -33,6 +34,7 @@ When applying templates individually, apply them in this order:
 6. rspec          → apply after base so CI is updated automatically
 7. letter-opener  → no dependencies, apply any time
 8. flash-message  → depends on the Tailwind theme and navbar height
+9. blog           → requires tailwindcss and authentication; apply after navbar and flash-message
 ```
 
 The root template on this branch handles the ordering automatically.

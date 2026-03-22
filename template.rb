@@ -1,117 +1,21 @@
-# Configures .gitignore and GitHub Actions CI for a Rails 8 + PostgreSQL app.
-# Vendor gems are excluded from git — run `bundle install` after cloning.
+# Configures ActionMailer to open emails in the browser during development.
+# Uses the letter_opener gem — no emails are sent; each delivery opens a
+# new browser tab showing the rendered email.
 
-say "Configuring .gitignore...", :cyan
+say "Configuring letter_opener for development mail...", :cyan
 
-append_to_file ".gitignore", <<~GITIGNORE
+gem "letter_opener", group: :development
 
-  # Ignore bundled gems — run bundle install after cloning
-  /vendor/bundle
-GITIGNORE
+after_bundle do
+  # Set the delivery method to letter_opener in development
+  environment "config.action_mailer.delivery_method   = :letter_opener", env: "development"
+  environment "config.action_mailer.perform_deliveries = true",           env: "development"
 
-say "Updated .gitignore.", :green
+  # Provide a default host so mailers can generate full URLs (e.g. password reset links)
+  environment 'config.action_mailer.default_url_options = { host: "localhost", port: 3000 }',
+              env: "development"
 
-say "Writing GitHub Actions CI workflow...", :cyan
-
-ci_yml = <<~YAML
-  name: CI
-
-  on:
-    pull_request:
-    push:
-      branches: [ main ]
-
-  jobs:
-    scan_ruby:
-      runs-on: ubuntu-latest
-
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
-
-        - name: Set up Ruby
-          uses: ruby/setup-ruby@v1
-          with:
-            ruby-version: .ruby-version
-            bundler-cache: true
-
-        - name: Scan for common Rails security vulnerabilities using static analysis
-          run: bin/brakeman --no-pager
-
-    scan_js:
-      runs-on: ubuntu-latest
-
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
-
-        - name: Set up Ruby
-          uses: ruby/setup-ruby@v1
-          with:
-            ruby-version: .ruby-version
-            bundler-cache: true
-
-        - name: Scan for security vulnerabilities in JavaScript dependencies
-          run: bin/importmap audit
-
-    lint:
-      runs-on: ubuntu-latest
-
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
-
-        - name: Set up Ruby
-          uses: ruby/setup-ruby@v1
-          with:
-            ruby-version: .ruby-version
-            bundler-cache: true
-
-        - name: Lint code for consistent style
-          run: bin/rubocop -f github
-
-    test:
-      runs-on: ubuntu-latest
-
-      services:
-        postgres:
-          image: postgres
-          env:
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: postgres
-          ports:
-            - 5432:5432
-          options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
-
-      steps:
-        - name: Install packages
-          run: sudo apt-get update && sudo apt-get install --no-install-recommends -y google-chrome-stable curl libjemalloc2 libvips postgresql-client
-
-        - name: Checkout code
-          uses: actions/checkout@v4
-
-        - name: Set up Ruby
-          uses: ruby/setup-ruby@v1
-          with:
-            ruby-version: .ruby-version
-            bundler-cache: true
-
-        - name: Run tests
-          env:
-            RAILS_ENV: test
-            DATABASE_URL: postgres://postgres:postgres@localhost:5432
-          run: bin/rails db:migrate db:test:prepare test test:system
-
-        - name: Keep screenshots from failed system tests
-          uses: actions/upload-artifact@v4
-          if: failure()
-          with:
-            name: screenshots
-            path: ${{ github.workspace }}/tmp/screenshots
-            if-no-files-found: ignore
-YAML
-
-create_file ".github/workflows/ci.yml", ci_yml, force: true
-
-say "Created .github/workflows/ci.yml.", :green
-say "\nSetup complete.", :blue
+  say "Configured ActionMailer in config/environments/development.rb.", :green
+  say "\nLetter opener setup complete.", :blue
+  say "Emails sent in development will open automatically in your browser.", :yellow
+end

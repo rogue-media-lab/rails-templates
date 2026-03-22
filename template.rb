@@ -1,7 +1,8 @@
 # Blog template for Rails 8 — Rogue Media Lab
 #
 # Adds a full blog with admin dashboard to an existing Rails 8 app.
-# Generates a Post model with Action Text body and Active Storage cover image,
+# Generates a Post model with Action Text body and Active Storage cover image
+# (original files only — add image_processing gem if you need variants/thumbnails),
 # an admin namespace with full CRUD, and a public-facing index and show.
 #
 # Required — apply these first:
@@ -24,15 +25,6 @@ end
 say "\nSetting up blog...", :cyan
 
 after_bundle do
-  # --- image_processing gem ---
-  # Added here rather than at the top level to avoid triggering an extra
-  # bundle install cycle that would re-fire all other templates' after_bundle hooks.
-  unless File.read("Gemfile").include?("image_processing")
-    say "Adding image_processing gem...", :cyan
-    inject_into_file "Gemfile", "\ngem \"image_processing\", \"~> 1.2\"\n", before: /^group :development/
-    run "bundle install --quiet"
-  end
-
   # --- Idempotency guard ---
   if File.exist?("app/models/post.rb")
     say "Blog already configured — skipping.", :yellow

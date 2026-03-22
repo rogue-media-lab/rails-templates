@@ -9,12 +9,14 @@
 #
 # This template then overwrites those views with Tailwind-styled versions.
 
-say "Running Rails 8 authentication generator...", :cyan
-
-generate "authentication"
-rails_command "db:migrate"
-
-say "Authentication scaffold generated.", :green
+if File.exist?("app/models/user.rb")
+  say "User model already exists — skipping authentication generator.", :yellow
+else
+  say "Running Rails 8 authentication generator...", :cyan
+  generate "authentication"
+  rails_command "db:migrate"
+  say "Authentication scaffold generated.", :green
+end
 
 # Shared input field class used across all auth forms
 INPUT_CLASS  = "w-full px-3 py-2 border border-ivory-300 rounded-md text-ivory-900 " \

@@ -70,7 +70,7 @@ after_bundle do
 
   # --- Update User model ---
   say "Updating User model...", :cyan
-  inject_into_file "app/models/user.rb", before: "end" do
+  inject_into_class "app/models/user.rb", "User" do
     <<~RUBY
 
         has_many :posts, dependent: :destroy

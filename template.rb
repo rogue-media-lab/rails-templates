@@ -305,7 +305,7 @@ after_bundle do
             <div>
               <p class="text-sm font-medium text-ivory-900"><%= post.title %></p>
               <p class="text-xs text-ivory-400 mt-0.5">
-                <%= post.published? ? "Published #{post.published_at.strftime('%b %-d, %Y')}" : "Draft" %>
+                <%= post.published? ? "Published \#{post.published_at.strftime('%b %-d, %Y')}" : "Draft" %>
               </p>
             </div>
             <%= link_to "Edit", edit_admin_post_path(post), class: "text-xs text-ivory-400 hover:text-ivory-900 transition-colors" %>
@@ -368,7 +368,7 @@ after_bundle do
                 <td class="px-6 py-4 text-right space-x-4">
                   <%= link_to "Edit", edit_admin_post_path(post), class: "text-xs text-ivory-500 hover:text-ivory-900 transition-colors" %>
                   <%= button_to "Delete", admin_post_path(post), method: :delete,
-                        data: { turbo_confirm: "Delete \"#{post.title}\"?" },
+                        data: { turbo_confirm: "Delete \"\#{post.title}\"?" },
                         class: "text-xs text-red-400 hover:text-red-600 bg-transparent border-0 p-0 cursor-pointer transition-colors" %>
                 </td>
               </tr>
